@@ -6,8 +6,7 @@ def get_keypoints_and_descriptors(image, sift):
     return kp, des
 
 
-
-def add_transformed_descriptors(image, sift, keypoints_list, descriptors_list, transformations_list):
+def add_trans_descript(image, sift, keypoints_list, descriptors_list, transformations_list):
     transformations = [None, cv2.flip(image, 1)]
     for angle in range(0, 360, 90):
         for transform in transformations:
@@ -20,3 +19,5 @@ def add_transformed_descriptors(image, sift, keypoints_list, descriptors_list, t
             keypoints_list.append(kp)
             descriptors_list.append(des)
             transformations_list.append((transform, angle))
+    
+    return keypoints_list, descriptors_list, transformations_list
