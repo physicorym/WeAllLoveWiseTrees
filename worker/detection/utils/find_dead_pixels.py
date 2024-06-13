@@ -131,6 +131,6 @@ def process_and_display_image(file_path):
         ])
         return df, fixed_image_array
 
-"""пример вызова функции"""
+"""Пример вызова функции."""
 #multichannel_tiff_image_path = '../18. Sitronics/1_20/crop_1_0_0000.tif'
 #process_and_display_image(multichannel_tiff_image_path)
