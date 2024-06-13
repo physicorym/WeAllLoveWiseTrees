@@ -4,48 +4,63 @@ import rasterio
 
 from utils.find_features import get_keypoints_and_descriptors, add_trans_descript
 from utils.extract_geotiff import get_image_center_coord, transform_coord
+from utils.image import normalize_channel, generate_crop_transformations
 
 
-def detect(layout: np.ndarray, crop: np.ndarray) -> dict:
+def detect(layout_path: str, crop: np.ndarray) -> dict:
 
-    # orig_coord_layout = get_image_center_coord(layout)
+    with rasterio.open(layout_path) as image:
+        layout_image = image.read()
+        layout_image_meta = image.meta
 
-    max_size = max(crop.shape[0], crop.shape[1])
-    crop = cv2.resize(crop, (max_size, max_size))
+    normalized_channels = []
+    for i in range(layout_image.shape[0]):
+        normalized_channel = normalize_channel(layout_image[i])
+        normalized_channels.append(normalized_channel)
+
+    large_image_normalized = np.stack(normalized_channels, axis=-1)
+    large_image_bgr = cv2.cvtColor(large_image_normalized, cv2.COLOR_RGB2BGR)
+    large_image_normalized_orig = large_image_normalized
+    large_image_normalized = cv2.resize(large_image_normalized, (5000, 5000))
+
+    normalized_channels_crop = []
+    for i in range(crop.shape[0]):
+        normalized_channel_crop = normalize_channel(crop[i])
+        normalized_channels_crop.append(normalized_channel_crop)
+
+    crop_image_normalized = np.stack(normalized_channels_crop, axis=-1)
+    crop_image_bgr = cv2.cvtColor(crop_image_normalized, cv2.COLOR_RGB2BGR)
+
+    crop_transformations = generate_crop_transformations(crop_image_bgr)
 
     sift = cv2.SIFT_create()
 
-    kp1, des1 = get_keypoints_and_descriptors(layout, sift)
-
-    keypoints_list = []
-    descriptors_list = []
-    transformations_list = []
-    keypoints_list, descriptors_list, transformations_list = add_trans_descript(crop, sift, keypoints_list, descriptors_list, transformations_list)
+    kp1, des1 = sift.detectAndCompute(large_image_bgr, None)
 
     bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
-    all_matches = []
-    for i, des2 in enumerate(descriptors_list):
+    best_matches = None
+    best_transformation = None
+    max_good_matches = 0
+
+    for crop_trans in crop_transformations:
+        kp2, des2 = sift.detectAndCompute(crop_trans, None)
         matches = bf.match(des1, des2)
-        for match in matches:
-            match.imgIdx = i
-        all_matches.extend(matches)
+        matches = sorted(matches, key=lambda x: x.distance)
+        good_matches = matches[:50]
+        
+        if len(good_matches) > max_good_matches:
+            max_good_matches = len(good_matches)
+            best_matches = good_matches
+            best_transformation = crop_trans
 
-    all_matches = sorted(all_matches, key=lambda x: x.distance)
+    if best_matches:
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in best_matches]).reshape(-1, 1, 2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in best_matches]).reshape(-1, 1, 2)
 
-    good_matches = all_matches[:50]
+        M, mask = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC, 5.0)
 
-    src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
-    dst_pts = np.float32([keypoints_list[m.imgIdx][m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+        h, w = best_transformation.shape[:2]
+        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+        dst = cv2.perspectiveTransform(pts, M)
 
-    M, mask = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC, 5.0)
-
-    h, w = crop.shape[:2]
-    pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-    dst = cv2.perspectiveTransform(pts, M)
-
-    with rasterio.open("/Volumes/T7/opensource_datasets/SPACE_HACK_summer/layouts/layout_2022-03-17.tif") as src:
-        transform = src.transform
-
-        transformed_points = [transform_coord(point[0][0], point[0][1], transform) for point in dst]
-
-    return transformed_points
+    return dst
