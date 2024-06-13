@@ -1,20 +1,15 @@
-import numpy as np
-import pandas as pd
-import tifffile as tiff
-
 from image import load_multichannel_tiff_image
+import numpy as np
+import tifffile as tiff
+import pandas as pd
 
-def detect_and_fix_dead_pixels(channel, channel_number, ratio_threshold=5, percentage_threshold=0.2):
-    """
-    Обнаруживает и исправляет мертвые пиксели в канале изображения.
-    Args:
-        channel (numpy array): Канал изображения для обработки.
-        channel_number (int): Номер канала для отчета.
-        ratio_threshold (float): Порог отношения для обнаружения мертвых пикселей.
-        percentage_threshold (float): Порог отношения для исправления мертвых пикселей.
-    Returns:
-        tuple: Канал с исправленными мертвыми пикселями и отчет.
-    """
+#def load_multichannel_tiff_image(file_path):
+#    """Загружает многоканальное TIFF-изображение."""
+#    image = tiff.imread(file_path)
+#    return image
+
+def detect_and_fix_dead_pixels(channel, channel_number, ratio_threshold=5, percentage_threshold=0.15):
+    """Детектирование "битых" пикселей и замени их значений по периметру (rows-1), (columns-1) кропа."""
     fixed_channel = channel.copy()
     rows, cols = channel.shape
     report = []
@@ -35,17 +30,8 @@ def detect_and_fix_dead_pixels(channel, channel_number, ratio_threshold=5, perce
 
     return fixed_channel, report
 
-def detect_and_fix_border_dead_pixels(channel, channel_number, ratio_threshold=5, percentage_threshold=0.2):
-    """
-    Обнаруживает и исправляет мертвые пиксели на границах канала изображения.
-    Args:
-        channel (numpy array): Канал изображения для обработки.
-        channel_number (int): Номер канала для отчета.
-        ratio_threshold (float): Порог отношения для обнаружения мертвых пикселей.
-        percentage_threshold (float): Порог отношения для исправления мертвых пикселей.
-    Returns:
-        tuple: Канал с исправленными мертвыми пикселями и отчет.
-    """
+def detect_and_fix_border_dead_pixels(channel, channel_number, ratio_threshold=5, percentage_threshold=0.15):
+    """Детектирование "битых" пикселей и замени их значений по внешней границе кропа."""
     rows, cols = channel.shape
     report = []
 
@@ -80,9 +66,7 @@ def detect_and_fix_border_dead_pixels(channel, channel_number, ratio_threshold=5
     return channel, report
 
 def apply_custom_padding(channel):
-    """
-    Применяет паддинг к изображению, используя среднее значение 5 ближайших пикселей.
-    """
+    """Введение кастомного паддинга для последующей обработки границы пикселей кропа."""
     rows, cols = channel.shape
     padded_channel = np.zeros((rows + 2, cols + 2), dtype=channel.dtype)
     padded_channel[1:-1, 1:-1] = channel
@@ -103,23 +87,27 @@ def apply_custom_padding(channel):
     return padded_channel
 
 def save_report_to_csv(report_data, file_path):
-    """Сохраняет отчет о исправленных пикселях в файл CSV."""
+    """Сохранение отчета о битых пикселей в виде таблицы."""
     df = pd.DataFrame(report_data, columns=[
-        'Номер строки',
-        'Номер столбца',
-        'Номер канала',
-        'Битое значение',
-        'Исправленное значение'
+        'номер строки',
+        'номер столбца',
+        'номер канала',
+        '«битое» значение',
+        'исправленное значение'
     ])
     df.to_csv(file_path, index=False)
 
-def process_image(file_path):
-    """Обрабатывает изображение и создает отчет об исправленных мертвых пикселях."""
+def process_and_display_image(file_path):
+    """Обработка кропа с "битыми" пикселями и возвращение "исправленного" кропа с информации о исправлениях"""
     image_array = load_multichannel_tiff_image(file_path)
     report_data = []
 
     if image_array.shape[-1] == 4:
-        for i in range(4):
+        channels = ['Red', 'Green', 'Blue', 'NIR']
+        cmap_list = ['Reds', 'Greens', 'Blues', 'gray']
+        processed_channels = []
+
+        for i, channel_name in enumerate(channels):
             channel = image_array[:, :, i]
             padded_channel = apply_custom_padding(channel)
             fixed_padded_channel, channel_report = detect_and_fix_dead_pixels(padded_channel, i + 1)
@@ -127,24 +115,22 @@ def process_image(file_path):
             fixed_channel, border_report = detect_and_fix_border_dead_pixels(fixed_channel, i + 1)
             report_data.extend(channel_report)
             report_data.extend(border_report)
+            processed_channels.append((channel, fixed_channel, channel_name, cmap_list[i]))
 
-        fixed_image_array = np.stack(
-            [fixed_channel for _, fixed_channel, _ in [(i, image_array[:, :, i], i) for i in range(4)]], axis=-1
-        )
-        tiff.imwrite(file_path.replace('.tif', '_fixed.tif'), fixed_image_array.astype(np.uint16))
-
-        report_path = file_path.replace('.tif', '_report2.csv')
-        save_report_to_csv(report_data, report_path)
-
+        fixed_image_array = np.stack([fixed_channel for _, fixed_channel, _, _ in processed_channels], axis=-1)
+        #rgb_image_fixed_path = file_path.replace('.tif', '_rgbnir_fixed.tif') # отвечает за сохранение исправленного кропа в формате tiff
+        #tiff.imwrite(rgb_image_fixed_path, rgb_image_fixed.astype(np.uint16))
+        #report_path = file_path.replace('.tif', '_dead_pixels_report.csv') # отвечает за сохранение отчета о "битых" пикселях и их координатах
+        #save_report_to_csv(report_data, report_path)
         df = pd.DataFrame(report_data, columns=[
-            'Номер строки',
-            'Номер столбца',
-            'Номер канала',
-            'Битое значение',
-            'Исправленное значение'
+            'номер строки',
+            'номер столбца',
+            'номер канала',
+            '«битое» значение',
+            'исправленное значение'
         ])
-        return df
+        return df, fixed_image_array
 
-multichannel_tiff_image_path = '/Users/user/virtualenv/LCT_2024_18/data/Sitronics/1_20/crop_0_0_0000.tif'
-df_report = process_image(multichannel_tiff_image_path)
-print(df_report)
+"""пример вызова функции"""
+#multichannel_tiff_image_path = '../18. Sitronics/1_20/crop_1_0_0000.tif'
+#process_and_display_image(multichannel_tiff_image_path)
