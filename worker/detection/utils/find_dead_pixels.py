@@ -87,7 +87,7 @@ def apply_custom_padding(channel):
     return padded_channel
 
 def save_report_to_csv(report_data, file_path):
-    """Сохранение отчета о битых пикселей в виде таблицы."""
+    """Сохранение отчета о "битых" пикселях в виде таблицы."""
     df = pd.DataFrame(report_data, columns=[
         'номер строки',
         'номер столбца',
@@ -97,8 +97,8 @@ def save_report_to_csv(report_data, file_path):
     ])
     df.to_csv(file_path, index=False)
 
-def process_and_display_image(file_path):
-    """Обработка кропа с "битыми" пикселями и возвращение "исправленного" кропа с информации о исправлениях"""
+def process_and_display_image(file_path, ratio_threshold=5, percentage_threshold=0.15):
+    """Обработка кропа с "битыми" пикселями и возвращение "исправленного" кропа с информацией о исправлениях."""
     image_array = load_multichannel_tiff_image(file_path)
     report_data = []
 
@@ -110,9 +110,13 @@ def process_and_display_image(file_path):
         for i, channel_name in enumerate(channels):
             channel = image_array[:, :, i]
             padded_channel = apply_custom_padding(channel)
-            fixed_padded_channel, channel_report = detect_and_fix_dead_pixels(padded_channel, i + 1)
+            (fixed_padded_channel,
+             channel_report) = detect_and_fix_dead_pixels(padded_channel, i + 1, ratio_threshold,
+                                                          percentage_threshold)
             fixed_channel = fixed_padded_channel[1:-1, 1:-1]
-            fixed_channel, border_report = detect_and_fix_border_dead_pixels(fixed_channel, i + 1)
+            (fixed_channel,
+             border_report) = detect_and_fix_border_dead_pixels(fixed_channel, i + 1, ratio_threshold,
+                                                                percentage_threshold)
             report_data.extend(channel_report)
             report_data.extend(border_report)
             processed_channels.append((channel, fixed_channel, channel_name, cmap_list[i]))
