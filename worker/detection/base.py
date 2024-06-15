@@ -1,43 +1,47 @@
+
 import numpy as np
 import cv2
 import rasterio
-
-from utils.find_features import get_keypoints_and_descriptors, add_trans_descript
-from utils.extract_geotiff import get_image_center_coord, transform_coord
 from utils.image import normalize_channel, generate_crop_transformations
+from utils.find_dead_pixels import process_and_display_image
 
+def pixel_to_geo(transform, pixel_x, pixel_y):
+    geo_x = transform[2] + pixel_x * transform[0] + pixel_y * transform[1]
+    geo_y = transform[5] + pixel_x * transform[3] + pixel_y * transform[4]
+    return geo_x, geo_y
 
-def detect(layout_path: str, crop: np.ndarray) -> dict:
-
-    with rasterio.open(layout_path) as image:
+def detect(layout_name: str, crop: np.ndarray) -> dict:
+    with rasterio.open(layout_name) as image:
         layout_image = image.read()
         layout_image_meta = image.meta
 
-    normalized_channels = []
-    for i in range(layout_image.shape[0]):
-        normalized_channel = normalize_channel(layout_image[i])
-        normalized_channels.append(normalized_channel)
-
+    normalized_channels = [normalize_channel(layout_image[i]) for i in range(layout_image.shape[0])]
     large_image_normalized = np.stack(normalized_channels, axis=-1)
-    large_image_bgr = cv2.cvtColor(large_image_normalized, cv2.COLOR_RGB2BGR)
-    large_image_normalized_orig = large_image_normalized
-    large_image_normalized = cv2.resize(large_image_normalized, (5000, 5000))
+    large_image_normalized = cv2.resize(large_image_normalized, (4000, 4000))
 
-    normalized_channels_crop = []
-    for i in range(crop.shape[0]):
-        normalized_channel_crop = normalize_channel(crop[i])
-        normalized_channels_crop.append(normalized_channel_crop)
-
+    normalized_channels_crop = [normalize_channel(crop[i]) for i in range(crop.shape[0])]
     crop_image_normalized = np.stack(normalized_channels_crop, axis=-1)
-    crop_image_bgr = cv2.cvtColor(crop_image_normalized, cv2.COLOR_RGB2BGR)
 
-    crop_transformations = generate_crop_transformations(crop_image_bgr)
+    df_dead_pix_crop = process_and_display_image(crop_image_normalized)
+
+    if df_dead_pix_crop is None:
+        print("Processed crop image is None.")
+        return {
+            'geo_coord': None,
+            'pixel_coord': None,
+            'median_geo_coord': None,
+            'df_dead_pix_crop': df_dead_pix_crop,
+            'crop_fix': crop_fix
+        }
+    
+    df_dead_pix, crop_fix = df_dead_pix_crop
+
+    crop_transformations = generate_crop_transformations(crop_fix)
 
     sift = cv2.SIFT_create()
-
-    kp1, des1 = sift.detectAndCompute(large_image_bgr, None)
-
+    kp1, des1 = sift.detectAndCompute(large_image_normalized, None)
     bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+
     best_matches = None
     best_transformation = None
     max_good_matches = 0
@@ -47,7 +51,7 @@ def detect(layout_path: str, crop: np.ndarray) -> dict:
         matches = bf.match(des1, des2)
         matches = sorted(matches, key=lambda x: x.distance)
         good_matches = matches[:50]
-        
+
         if len(good_matches) > max_good_matches:
             max_good_matches = len(good_matches)
             best_matches = good_matches
@@ -63,4 +67,25 @@ def detect(layout_path: str, crop: np.ndarray) -> dict:
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         dst = cv2.perspectiveTransform(pts, M)
 
-    return dst
+        transform = layout_image_meta['transform']
+        geo_coords = [pixel_to_geo(transform, pt[0][0], pt[0][1]) for pt in dst]
+
+        median_pixel_x = np.median([pt[0][0] for pt in dst])
+        median_pixel_y = np.median([pt[0][1] for pt in dst])
+        median_geo_coord = pixel_to_geo(transform, median_pixel_x, median_pixel_y)
+
+        return {
+            'geo_coord': geo_coords,
+            'pixel_coord': dst,
+            'median_geo_coord': median_geo_coord,
+            'dead_pixel_coord': df_dead_pix,
+            'crop_fix': crop_fix
+        }
+
+    return {
+        'geo_coord': None,
+        'pixel_coord': None,
+        'median_geo_coord': None,
+        'dead_pixel_coord': df_dead_pix,
+        'crop_fix': crop_fix
+    }
