@@ -2,9 +2,11 @@ import tifffile as tiff
 import cv2
 import numpy as np
 
+
 def load_multichannel_tiff_image(file_path):
     image = tiff.imread(file_path)
     return image
+
 
 def create_tiff_rgb(file_path):
 

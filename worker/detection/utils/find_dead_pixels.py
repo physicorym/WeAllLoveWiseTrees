@@ -1,4 +1,4 @@
-from image import load_multichannel_tiff_image
+from utils.image import load_multichannel_tiff_image
 import numpy as np
 import tifffile as tiff
 import pandas as pd
@@ -97,9 +97,9 @@ def save_report_to_csv(report_data, file_path):
     ])
     df.to_csv(file_path, index=False)
 
-def process_and_display_image(file_path, ratio_threshold=5, percentage_threshold=0.15):
+def process_and_display_image(image_array, ratio_threshold=5, percentage_threshold=0.15):
     """Обработка кропа с "битыми" пикселями и возвращение "исправленного" кропа с информацией о исправлениях."""
-    image_array = load_multichannel_tiff_image(file_path)
+    # image_array = crop #load_multichannel_tiff_image(file_path)
     report_data = []
 
     if image_array.shape[-1] == 4:
