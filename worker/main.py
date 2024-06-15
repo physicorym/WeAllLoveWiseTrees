@@ -14,7 +14,6 @@ def main():
     async def run_worker_background_tasks(_app):
         tasks = [
             asyncio.create_task(worker.process_task()),
-            asyncio.create_task(worker.send_task_results())
         ]
         yield
 
@@ -26,8 +25,9 @@ def main():
 
     app = web.Application()
     app.cleanup_ctx.append(run_worker_background_tasks)
-    app.add_routes([web.get('/', worker.receive_tasks)])
-    web.run_app(app, port=8888)
+    app.add_routes([web.post('/', worker.detect)])
+    app.add_routes([web.get('/', worker.get_task_result)])
+    web.run_app(app, port=8000)
 
 
 if __name__ == '__main__':
