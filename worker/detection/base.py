@@ -76,16 +76,16 @@ def detect(layout_name: str, crop: np.ndarray) -> dict:
 
         return {
             'geo_coord': geo_coords,
-            'pixel_coord': dst,
             'median_geo_coord': median_geo_coord,
+            'pixel_geo_coord': dst,
             'dead_pixel_coord': df_dead_pix,
             'crop_fix': crop_fix
         }
 
     return {
         'geo_coord': None,
-        'pixel_coord': None,
         'median_geo_coord': None,
+        'pixel_geo_coord': None,
         'dead_pixel_coord': df_dead_pix,
         'crop_fix': crop_fix
     }
