@@ -1,4 +1,5 @@
 import asyncio
+import os
 from contextlib import suppress
 
 from aiohttp import web
@@ -8,6 +9,8 @@ from worker import Worker
 
 
 def main():
+    app_port = int(os.getenv("APP_PORT", "8000"))
+
     init_log(stdout_level="DEBUG")
     worker = Worker()
     
@@ -27,7 +30,7 @@ def main():
     app.cleanup_ctx.append(run_worker_background_tasks)
     app.add_routes([web.post('/', worker.detect)])
     app.add_routes([web.get('/', worker.get_task_result)])
-    web.run_app(app, port=8000)
+    web.run_app(app, port=app_port)
 
 
 if __name__ == '__main__':
