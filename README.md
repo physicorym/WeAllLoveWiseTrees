@@ -68,4 +68,4 @@ print("Result: ", r.json())
 По GET-запросу по URL `/` с указанием `task_id` возвращаются результаты детекции. Если детекция еще в процессе, метод
 обработки запроса будет дожидаться окончания детекции и только потом вернет результат.
 
-![System design](./pics/System%20Design-Page.png)
+![System design](docs/System%20Design-Page.png)
