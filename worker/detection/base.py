@@ -1,22 +1,17 @@
-
-import numpy as np
 import cv2
+import numpy as np
 import rasterio
-from detection.utils.image import normalize_channel, generate_crop_transformations
 from detection.utils.find_dead_pixels import process_and_display_image
+from detection.utils.image import normalize_channel, generate_crop_transformations
+
 
 def pixel_to_geo(transform, pixel_x, pixel_y):
     geo_x = transform[2] + pixel_x * transform[0] + pixel_y * transform[1]
     geo_y = transform[5] + pixel_x * transform[3] + pixel_y * transform[4]
     return geo_x, geo_y
 
-def detect(layout_name: str, crop: np.ndarray, height: int, width: int) -> dict:
-
-    # вот здесь надо подготовить кроп
-    crop = np.frombuffer(crop, dtype=np.uint16)
-    crop = crop.reshape((height, width, 4))
-
-    with rasterio.open(layout_name) as image:
+def detect(layout_name: str, crop: np.ndarray) -> dict:
+    with rasterio.open(f"./layouts/{layout_name}") as image:
         layout_image = image.read()
         layout_image_meta = image.meta
 
