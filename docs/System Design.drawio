@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2024-06-16T09:23:14.576Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.5.1 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="hartJ2L7WxxmgYB__cWc" version="24.5.1" type="device">
+<mxfile host="Electron" modified="2024-06-16T17:32:42.081Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.5.1 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="EREJrHCa-y7MCKTSmKps" version="24.5.1" type="device">
   <diagram name="Page-1" id="UDNdTbz0KM1wlBxlJ1lN">
     <mxGraphModel dx="1132" dy="1047" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -51,7 +51,7 @@
         <mxCell id="wGTgKy5DA3Dax--A0Zx4-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="wGTgKy5DA3Dax--A0Zx4-7" target="YpXR1NYP6XQu3CqXUiG9-3" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="wGTgKy5DA3Dax--A0Zx4-7" value="detect(layout_name: str, crop: np.ndarray, height: int, width: int)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+        <mxCell id="wGTgKy5DA3Dax--A0Zx4-7" value="detect(layout_name: str, crop: np.ndarray)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="200" y="760" width="280" height="40" as="geometry" />
         </mxCell>
         <mxCell id="wGTgKy5DA3Dax--A0Zx4-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="wGTgKy5DA3Dax--A0Zx4-13" target="wGTgKy5DA3Dax--A0Zx4-16" edge="1">

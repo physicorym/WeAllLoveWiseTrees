@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import pickle
 import random
 import time
 from dataclasses import dataclass
@@ -12,7 +13,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 
-from detection.base import detect
+from detection import detect
 
 
 logger = logging.getLogger(__name__)
@@ -23,8 +24,6 @@ class Task:
     task_id: int
     layout_name: str
     crop_content: bytes
-    crop_height: int
-    crop_width: int
 
 
 class Worker:
@@ -41,13 +40,7 @@ class Worker:
         crop = data['file'].file.read()
         task_id = random.randint(0, hash(time.time()))
         logger.info("Task id: %s", task_id)
-        task = Task(
-            task_id=task_id,
-            crop_content=crop,
-            layout_name=request.query["layout_name"],
-            crop_height=int(request.query["crop_height"]),
-            crop_width=int(request.query["crop_width"]),
-        )
+        task = Task(task_id=task_id, crop_content=crop, layout_name=request.query["layout_name"])
         self.task_queue.put_nowait(task)
 
         return web.json_response({"task_id": task_id})
@@ -69,9 +62,8 @@ class Worker:
                         await asyncio.sleep(0)
                     task = self.task_queue.get_nowait()
                     logger.info("Got new task: %s", task.task_id)
-                    crop = np.frombuffer(task.crop_content)
-                    result = pool.apply_async(self.detect_with_measuring,
-                                              (task.layout_name, crop, task.crop_height, task.crop_width)).get()
+                    crop = pickle.loads(task.crop_content)
+                    result = pool.apply_async(self.detect_with_measuring, (task.layout_name, crop)).get()
                     result["layout_name"] = task.layout_name
                     self.tasks[task.task_id] = result
                     logger.info("Task %s is processed", task.task_id)
@@ -80,11 +72,11 @@ class Worker:
                     logger.error("An exception occurred: %s %s", type(exc), exc)
 
     @staticmethod
-    def detect_with_measuring(layout_name: str, crop: np.ndarray, height: int, width: int) -> dict:
+    def detect_with_measuring(layout_name: str, crop: np.ndarray) -> dict:
         logger.info("Start detection")
         start_perf_counter = time.perf_counter()
         start = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-        result = detect(layout_name, crop, height=height, width=width)
+        result = detect(layout_name, crop)
         end = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         logger.info("Detection got %s seconds", time.perf_counter() - start_perf_counter)
 
