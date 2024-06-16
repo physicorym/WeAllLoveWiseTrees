@@ -12,7 +12,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
 
-from detection import detect
+from detection.base import detect
 
 
 logger = logging.getLogger(__name__)

@@ -13,7 +13,7 @@ def pixel_to_geo(transform, pixel_x, pixel_y):
 def detect(layout_name: str, crop: np.ndarray, height: int, width: int) -> dict:
 
     # вот здесь надо подготовить кроп
-    crop = np.frombuffer(crop, dtype=np.uint8)
+    crop = np.frombuffer(crop, dtype=np.uint16)
     crop = crop.reshape((height, width, 4))
 
     with rasterio.open(layout_name) as image:

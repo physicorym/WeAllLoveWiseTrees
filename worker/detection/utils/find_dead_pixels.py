@@ -1,4 +1,4 @@
-from utils.image import load_multichannel_tiff_image
+from detection.utils.image import load_multichannel_tiff_image
 import numpy as np
 import tifffile as tiff
 import pandas as pd
