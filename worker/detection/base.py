@@ -1,16 +1,23 @@
 
 import numpy as np
 import cv2
+from PIL import Image
+import io
 import rasterio
-from utils.image import normalize_channel, generate_crop_transformations
-from utils.find_dead_pixels import process_and_display_image
+from detection.utils.image import normalize_channel, generate_crop_transformations
+from detection.utils.find_dead_pixels import process_and_display_image
 
 def pixel_to_geo(transform, pixel_x, pixel_y):
     geo_x = transform[2] + pixel_x * transform[0] + pixel_y * transform[1]
     geo_y = transform[5] + pixel_x * transform[3] + pixel_y * transform[4]
     return geo_x, geo_y
 
-def detect(layout_name: str, crop: np.ndarray) -> dict:
+def detect(layout_name: str, crop: np.ndarray, height: int, width: int) -> dict:
+
+    # вот здесь надо подготовить кроп
+    crop = np.frombuffer(crop, dtype=np.uint8)
+    crop = crop.reshape((height, width, 4))
+
     with rasterio.open(layout_name) as image:
         layout_image = image.read()
         layout_image_meta = image.meta
@@ -31,12 +38,12 @@ def detect(layout_name: str, crop: np.ndarray) -> dict:
             'pixel_coord': None,
             'median_geo_coord': None,
             'df_dead_pix_crop': df_dead_pix_crop,
-            'crop_fix': crop_fix
+            'crop_fix': None
         }
     
     df_dead_pix, crop_fix = df_dead_pix_crop
 
-    crop_transformations = generate_crop_transformations(crop_fix)
+    crop_transformations = generate_crop_transformations(crop)
 
     sift = cv2.SIFT_create()
     kp1, des1 = sift.detectAndCompute(large_image_normalized, None)
