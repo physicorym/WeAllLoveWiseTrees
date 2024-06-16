@@ -1,10 +1,10 @@
-<mxfile host="Electron" modified="2024-06-15T21:03:57.928Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.5.1 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="ajC79O8iPuRd3Mc0OZYS" version="24.5.1" type="device">
+<mxfile host="Electron" modified="2024-06-16T09:23:14.576Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.5.1 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="hartJ2L7WxxmgYB__cWc" version="24.5.1" type="device">
   <diagram name="Page-1" id="UDNdTbz0KM1wlBxlJ1lN">
     <mxGraphModel dx="1132" dy="1047" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="jgQD-mLmlprnnaP6-Urn-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="YpXR1NYP6XQu3CqXUiG9-2" target="jgQD-mLmlprnnaP6-Urn-2">
+        <mxCell id="jgQD-mLmlprnnaP6-Urn-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="YpXR1NYP6XQu3CqXUiG9-2" target="jgQD-mLmlprnnaP6-Urn-2" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="YpXR1NYP6XQu3CqXUiG9-2" value="Worker" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -51,7 +51,7 @@
         <mxCell id="wGTgKy5DA3Dax--A0Zx4-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="wGTgKy5DA3Dax--A0Zx4-7" target="YpXR1NYP6XQu3CqXUiG9-3" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="wGTgKy5DA3Dax--A0Zx4-7" value="detect(layout_name: str, crop: np.ndarray)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+        <mxCell id="wGTgKy5DA3Dax--A0Zx4-7" value="detect(layout_name: str, crop: np.ndarray, height: int, width: int)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="200" y="760" width="280" height="40" as="geometry" />
         </mxCell>
         <mxCell id="wGTgKy5DA3Dax--A0Zx4-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="wGTgKy5DA3Dax--A0Zx4-13" target="wGTgKy5DA3Dax--A0Zx4-16" edge="1">
@@ -107,19 +107,19 @@
         <mxCell id="wGTgKy5DA3Dax--A0Zx4-41" value="Вернуть результат детекции. Если детекция в процессе, дожидаться ее завершения" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="440" y="330" width="140" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="jgQD-mLmlprnnaP6-Urn-1" value="Результат детекции" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="jgQD-mLmlprnnaP6-Urn-1" value="Результат детекции" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="480" y="940" width="140" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="jgQD-mLmlprnnaP6-Urn-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="jgQD-mLmlprnnaP6-Urn-2" target="jgQD-mLmlprnnaP6-Urn-4">
+        <mxCell id="jgQD-mLmlprnnaP6-Urn-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="jgQD-mLmlprnnaP6-Urn-2" target="jgQD-mLmlprnnaP6-Urn-4" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="jgQD-mLmlprnnaP6-Urn-2" value="Поместить запрос в очередь на детекцию" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+        <mxCell id="jgQD-mLmlprnnaP6-Urn-2" value="Поместить запрос в очередь на детекцию" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="200" y="520" width="280" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="jgQD-mLmlprnnaP6-Urn-4" value="Извлечь запрос из очереди" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+        <mxCell id="jgQD-mLmlprnnaP6-Urn-4" value="Извлечь запрос из очереди" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="200" y="600" width="280" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="jgQD-mLmlprnnaP6-Urn-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="jgQD-mLmlprnnaP6-Urn-2" target="jgQD-mLmlprnnaP6-Urn-2">
+        <mxCell id="jgQD-mLmlprnnaP6-Urn-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="jgQD-mLmlprnnaP6-Urn-2" target="jgQD-mLmlprnnaP6-Urn-2" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
