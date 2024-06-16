@@ -1,8 +1,6 @@
 
 import numpy as np
 import cv2
-from PIL import Image
-import io
 import rasterio
 from detection.utils.image import normalize_channel, generate_crop_transformations
 from detection.utils.find_dead_pixels import process_and_display_image
