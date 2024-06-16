@@ -42,7 +42,8 @@ docker container run -p 8000:8000 lctworker
 import tifffile as tiff
 
 image = tiff.imread(file_path)
-payload = {'layout_name': layout_name}
+height, width, _ = image.shape
+payload = {'layout_name': layout_name, "crop_height": height, "crop_width": width}
 files = {'file': ('filename', img.tobytes())}
 r = requests.post('http://127.0.0.1:8000/', params=payload, files=files)
 ```
@@ -56,8 +57,8 @@ print("Result: ", r.json())
 ```
 
 ## Как это работает
-Клиент формирует и отправляет POST-запрос по URL `/`, указывая `layout_name` (название подложки) в качестве payload и 
-`file` (содержимое кропа).
+Клиент формирует и отправляет POST-запрос по URL `/`, указывая `layout_name` (название подложки), `crop_height` (высота
+кропа) и `crop_width` (ширина кропа) в качестве payload и `file` (содержимое кропа).
 
 Запрос приходит в `Worker.detect`, парсится в объект `Task` и помещается в очередь на детекцию.
 Выделенная под задачу детекции корутина `process_task` ожидает задачу в очереди, принимает ее и создает новый процесс,
