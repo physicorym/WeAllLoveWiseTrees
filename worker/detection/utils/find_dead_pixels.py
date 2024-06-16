@@ -1,12 +1,5 @@
-from detection.utils.image import load_multichannel_tiff_image
 import numpy as np
-import tifffile as tiff
 import pandas as pd
-
-#def load_multichannel_tiff_image(file_path):
-#    """Загружает многоканальное TIFF-изображение."""
-#    image = tiff.imread(file_path)
-#    return image
 
 def detect_and_fix_dead_pixels(channel, channel_number, ratio_threshold=5, percentage_threshold=0.15):
     """Детектирование "битых" пикселей и замени их значений по периметру (rows-1), (columns-1) кропа."""
@@ -99,8 +92,9 @@ def save_report_to_csv(report_data, file_path):
 
 def process_and_display_image(image_array, ratio_threshold=5, percentage_threshold=0.15):
     """Обработка кропа с "битыми" пикселями и возвращение "исправленного" кропа с информацией о исправлениях."""
-    # image_array = crop #load_multichannel_tiff_image(file_path)
+
     report_data = []
+    image_array = image_array.transpose((0, 2, 1))
 
     if image_array.shape[-1] == 4:
         channels = ['Red', 'Green', 'Blue', 'NIR']
@@ -122,10 +116,6 @@ def process_and_display_image(image_array, ratio_threshold=5, percentage_thresho
             processed_channels.append((channel, fixed_channel, channel_name, cmap_list[i]))
 
         fixed_image_array = np.stack([fixed_channel for _, fixed_channel, _, _ in processed_channels], axis=-1)
-        #rgb_image_fixed_path = file_path.replace('.tif', '_rgbnir_fixed.tif') # отвечает за сохранение исправленного кропа в формате tiff
-        #tiff.imwrite(rgb_image_fixed_path, rgb_image_fixed.astype(np.uint16))
-        #report_path = file_path.replace('.tif', '_dead_pixels_report.csv') # отвечает за сохранение отчета о "битых" пикселях и их координатах
-        #save_report_to_csv(report_data, report_path)
         df = pd.DataFrame(report_data, columns=[
             'номер строки',
             'номер столбца',
@@ -134,7 +124,3 @@ def process_and_display_image(image_array, ratio_threshold=5, percentage_thresho
             'исправленное значение'
         ])
         return df, fixed_image_array
-
-"""Пример вызова функции."""
-#multichannel_tiff_image_path = '../18. Sitronics/1_20/crop_1_0_0000.tif'
-#process_and_display_image(multichannel_tiff_image_path)
