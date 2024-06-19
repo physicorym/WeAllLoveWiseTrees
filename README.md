@@ -51,11 +51,12 @@ docker container run -p 8000:8000 lctworker
 ```python
 import tifffile as tiff
 
-image = tiff.imread(file_path)
-height, width, _ = image.shape
+image = tiff.imread(crop_path)
+image_bytes = pickle.dumps(image)
 payload = {'layout_name': layout_name}
-files = {'file': ('filename', img.tobytes())}
+files = {'file': ('filename', image_bytes)}
 r = requests.post('http://127.0.0.1:8000/', params=payload, files=files)
+
 ```
 
 2. Получение результата детекции по GET-запросу с заданием `task_id`. Пример:
