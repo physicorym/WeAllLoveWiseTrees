@@ -50,6 +50,8 @@ docker container run -p 8000:8000 lctworker
 1. Отправка POST-запроса на детекцию. Пример:
 ```python
 import tifffile as tiff
+import pickle
+import requests
 
 image = tiff.imread(crop_path)
 image_bytes = pickle.dumps(image)
