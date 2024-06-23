@@ -22,7 +22,7 @@ def detect(layout_name: str, crop: np.ndarray) -> dict:
 
     normalized_channels = [normalize_channel(layout_image[i]) for i in range(layout_image.shape[0])]
     large_image_normalized = np.stack(normalized_channels, axis=-1)
-    large_image_normalized = cv2.resize(large_image_normalized, (4000, 4000))
+    large_image_normalized = cv2.resize(large_image_normalized, (8000, 8000))
 
     normalized_channels_crop = [normalize_channel(crop[i]) for i in range(crop.shape[0])]
     crop_image_normalized = np.stack(normalized_channels_crop, axis=-1)
